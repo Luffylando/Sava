@@ -33,7 +33,7 @@ const EditArticle = () => {
             title: data.title || article.Title,
             reporter: data.reporter || article.Reporter,
             body: data.body || article.Body,
-            categoryId: category || article.Category.CategoryID,
+            categoryId: category || article?.Category?.CategoryID || undefined,
             tags: selectedTags.length ? selectedTags.map((tags: any) => tags.value) : []
         }
 
@@ -46,7 +46,9 @@ const EditArticle = () => {
         const editArticle = async () => {
             const result = await axios.get(`${SERVER_URL}/articles/${id}`);
             setArticle(result.data.article);
-            setCategory(result.data.article.Category.CategoryID)
+            if (result.data.article.Category?.CategoryID) {
+                setCategory(result.data.article.Category?.CategoryID)
+            }
             setSelectedTags(result.data.article.Tags.map((tag: any) => {
                 return { value: tag.TagID, label: tag.Title }
             }))
@@ -122,7 +124,7 @@ const EditArticle = () => {
                                 />
                                 {errors?.title && <p>{errors.title.message}</p>}
                             </div>
-                            {categories &&
+                            {categories.length !== 0 &&
                                 <div className="mb-2">
                                     <label className="text-xs mb-1 w-80 flex">Pick Category</label>
                                     <Select
@@ -135,18 +137,20 @@ const EditArticle = () => {
                                     />
                                 </div>
                             }
-                            <div className="mb-2">
-                                <label className="text-xs mb-1 w-80 flex">Pick Tags</label>
-                                <MultiSelect
-                                    options={tagsOptions}
-                                    value={selectedTags}
-                                    onChange={setSelectedTags}
-                                    labelledBy={"Select"}
-                                    isCreatable={true}
-                                    disableSearch={true}
-                                    hasSelectAll={false}
-                                />
-                            </div>
+                            {tags.length !== 0 &&
+                                <div className="mb-2">
+                                    <label className="text-xs mb-1 w-80 flex">Pick Tags</label>
+                                    <MultiSelect
+                                        options={tagsOptions}
+                                        value={selectedTags}
+                                        onChange={setSelectedTags}
+                                        labelledBy={"Select"}
+                                        isCreatable={true}
+                                        disableSearch={true}
+                                        hasSelectAll={false}
+                                    />
+                                </div>
+                            }
                         </div>
                     </div>
                     <div className="flex align-center justify-center">
